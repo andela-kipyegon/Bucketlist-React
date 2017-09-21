@@ -2,7 +2,6 @@ import * as types from '../constants/actionTypes';
 import initialState from './initialState';
 
 export default function modalReducer(state = initialState.modal, action) {
-    // const newState = Object.assign({}, state);
 
     switch (action.type) {
 

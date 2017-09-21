@@ -3,82 +3,132 @@ import { connect } from 'react-redux';
 
 import { Table } from 'react-bootstrap'; 
 import { MdEdit, MdDelete, MdVisibility } from 'react-icons/lib/md';
+import Modal from 'react-modal';
 import Toggle from 'react-toggle'
 
 import { hideModal } from  '../../../actions/bucketlistActions';
 import ModalWrapper from '../ModalWrapper';
+import ItemRow from '../ItemRow';
+import DeleteItem from '../item-modals/DeleteItem';
+import EditItem from '../item-modals/EditItem';
 
-const ViewBucket = ({ title, hideModal, content }) => {
-    const onClose = () => {
-         hideModal();
-    };
+class ViewBucket extends React.Component {
+    constructor(props, context) {
+        super(props, context);
 
-    let done = false
-    
-    const toggle = (value) => {
-        done = !value
+        this.state = {
+            showModal: false,
+            modalContent: null,
+            params: {
+                item: null,
+                action: null
+            }
+        }
+
+        this.onClose = this.onClose.bind(this);
+        this.updateItemName = this.updateItemName.bind(this);
+        this.openModal = this.openModal.bind(this);
+        this.closeModal = this.closeModal.bind(this);
     }
 
-    const padding = 'p-0'
-    return (
-        
+    onClose() {
+        this.props.hideModal();
+    }
 
-        <ModalWrapper title={title} onClose={onClose} padding={padding}> 
-            <Table striped bordered condensed hover>
-                <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Item Name</th>
-                    <th>Done</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Entebe</td>
-                    <td>
-                        <label>
-                            <Toggle
-                                defaultChecked={done}
-                                onChange={toggle(done)} />
-                        </label>
-                    </td>
-                    <td>
-                        <button type="button" className="action mx-2 icon-edit close" data-dismiss="modal">
-                            <MdEdit size={20}/>
-                        </button>
-                        <button type="button" className="action mx-2 icon-delete close" data-dismiss="modal">
-                            <MdDelete size={20}/>
-                        </button>
-                    </td>
-                </tr>
+    updateItemName(event) {
+        let item = this.state.params.item;
+        item.name = event.target.value;
+        return this.setState({
+            params : { item }
+        });  
+    }
 
-                <tr>
-                    <td>2</td>
-                    <td>Jinja</td>
-                    <td>
-                        <label>
-                            <Toggle
-                                defaultChecked={done}
-                                onChange={toggle(done)} />
-                        </label>
-                    </td>
-                    <td>
-                        <button type="button" className="action mx-2 icon-edit close" data-dismiss="modal">
-                            <MdEdit size={20}/>
-                        </button>
-                        <button type="button" className="action mx-2 icon-delete close" data-dismiss="modal">
-                            <MdDelete size={20}/>
-                        </button>
-                    </td>
-                </tr>
-        
-                </tbody>
-            </Table>
-        </ModalWrapper>
-    );
-};
+    editItem() {
+        // let bucketName = { name: this.state.bucket.name };
+        // this.props.actions.editBucketlist(bucketId, bucketName)
+        //     .then((response) =>{
+        //         toastr.success('Bucket has been updated');
+        //         return this.props.actions.hideModal();
+        //     }).catch(error => {
+        //         toastr.error(error)
+        //     });
+    }
+
+    openModal(modalType, itemId) {
+        if (modalType == 'edit') {
+            return this.setState({
+                modalContent: EditItem,
+                showModal: true,
+                params: {
+                    item: { ...this.props.content.filter(item => item.bucketlist_item_id == itemId)[0] }
+                }
+            });
+        }
+
+        return this.setState({
+            modalContent: DeleteItem,
+            showModal: true,
+            params: {
+                item: { ...this.props.content.filter(item => item.bucketlist_item_id == itemId)[0] }
+            }
+        }); 
+    }
+
+    closeModal() {
+        return this.setState({ showModal: false });
+    }
+
+    render() {
+        const padding = 'p-0';
+        const ModalContent = this.state.modalContent;
+        const params = { ...this.state.params, action: this.updateItemName }
+        let rows;
+
+        if (this.props.content.length > 1) {
+            rows = this.props.content.map(item => <ItemRow itemId={item.bucketlist_item_id} itemName={item.name} done={item.done} openModal={this.openModal} />);
+        }
+        else {
+            rows = <tr><td colSpan="4">Nothing to display</td></tr>;
+        }
+
+        return (
+            <ModalWrapper title={this.props.title} onClose={this.onClose} padding={padding}> 
+                <Table striped bordered condensed hover>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Item Name</th>
+                            <th>Done</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {rows}
+                    </tbody>
+                </Table>
+                {this.state.showModal && 
+                    <Modal
+                        isOpen={this.state.showModal}
+                        onRequestClose={this.closeModal}
+                        contentLabel="Modal"
+                        className="modal-dialog modal-sm">
+                        <div className="modal-content">
+                           <div className="modal-header theme-header">
+                                <h4 className="modal-title">Edit {this.state.params.item.name}</h4>
+                                <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.closeModal}>
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                           </div>
+                           <div className="modal-body">
+                              {<ModalContent {...params}/>}
+                           </div>
+                        </div>
+                    </Modal>}
+            </ModalWrapper>
+        );
+
+    }
+}
 
 ViewBucket.propTypes = {
     title: PropTypes.string,
@@ -87,8 +137,13 @@ ViewBucket.propTypes = {
 
 function mapDispatchToProps(dispatch) {
     return {
-        hideModal: () => dispatch(hideModal())
+        hideModal: () => dispatch(hideModal()),
+        editItem: (itemId, itemName) => dispatch(editItem(itemId, itemName)),
+        deleteItem: (itemId) => dispatch(editItem(itemId))
     };
 }
 
-export default connect(null,mapDispatchToProps)(ViewBucket);
+export default connect(null, mapDispatchToProps)(ViewBucket);
+
+
+

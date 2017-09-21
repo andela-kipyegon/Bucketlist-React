@@ -8,7 +8,6 @@ const EditBucket = ({ title, hideModal, content }) => {
     const onClose = () => {
          hideModal();
     };
-    
     return (
         <ModalWrapper title={title} onClose={onClose}> 
             {content}

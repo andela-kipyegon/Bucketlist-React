@@ -18,6 +18,12 @@ export default function bucketlistReducer(state = initialState.bucketlists, acti
                 bucketlist: state.bucketlist.filter(bucketlist => bucketlist.id !== action.bucketlistId )
             }
 
+        case types.EDIT_BUCKETLIST_SUCCESS:
+            return {
+                ...state,
+                bucketlist: [action.bucketlist, ...state.bucketlist.filter(bucketlist => bucketlist.id !== action.bucketlist.id)]
+            };
+
         default:
             return state;
     }

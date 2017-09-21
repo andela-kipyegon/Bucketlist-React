@@ -13,6 +13,7 @@ class ModalWrapper extends Component {
           open : false
         }
   }
+
   
   render () {
     const {onClose} = this.props;

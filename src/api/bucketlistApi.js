@@ -58,6 +58,30 @@ class bucketlistApi {
         });
     }
 
+    static editBucketlist(bucketId, name) {
+        return new Promise((resolve) => {
+           const request = new Request('https://bucketlist-application.herokuapp.com/api/v1/bucketlist/' + bucketId, {
+               method: 'PUT',
+               headers: new Headers({
+                   'Content-Type': 'application/json',
+                   'Authorization': 'Token ' + localStorage.getItem('auth_token')
+               }),
+               body: JSON.stringify(name)
+           });
+
+           return fetch(request).then(response => {
+               if (!response.ok) {
+                   reject('Enter a valid Bucket name');
+               }
+               resolve(response.json());
+           }).catch(error => {
+               return error;
+           });
+       });
+    }
+
+    
+
 }
 
 export default bucketlistApi;

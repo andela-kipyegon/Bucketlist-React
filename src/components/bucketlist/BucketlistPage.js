@@ -20,7 +20,7 @@ class BucketlistPage extends React.Component {
 
         this.state = {
             bucket: {name: ''}
-        }
+        };
 
         this.showAddModal = this.showAddModal.bind(this);
         this.updateBucketName = this.updateBucketName.bind(this);
@@ -96,7 +96,6 @@ class BucketlistPage extends React.Component {
 
     render() {
         const rows = this.showBuckets();
-
         return (
             <div>
                 {rows}

@@ -115,6 +115,15 @@ table .modal-body:parent {
   padding: 0px !important;
 }
 
+.item-actions {
+  margin-left: 10px;
+}
+
+.item-buttons {
+  position: relative;
+  left: 4em;
+} 
+
 .react-toggle {
   touch-action: pan-x;
 
