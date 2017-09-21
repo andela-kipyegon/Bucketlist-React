@@ -28,8 +28,8 @@ class Bucket extends React.Component {
 
     showViewBucket() {
         this.props.actions.loadModal(VIEW_BUCKET, {
-            title: 'Items in ' + this.props.bucket.name ,
-            content: this.state.bucket.items,
+            title: 'Items in ' + this.props.bucket.name,
+            bucketId: this.state.bucket.id,
             button: <Button bsStyle="success">Add Item</Button>
         });
     }

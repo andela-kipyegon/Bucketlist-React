@@ -80,6 +80,49 @@ class bucketlistApi {
        });
     }
 
+    static editItem(bucketId, itemId, updatedItem) {
+        return new Promise((resolve) => {
+           const request = new Request('https://bucketlist-application.herokuapp.com/api/v1/bucketlist/' + bucketId + '/bucketlistitem/' + itemId, {
+               method: 'PUT',
+               headers: new Headers({
+                   'Content-Type': 'application/json',
+                   'Authorization': 'Token ' + localStorage.getItem('auth_token')
+               }),
+               body: JSON.stringify(updatedItem)
+           });
+
+           return fetch(request).then(response => {
+               if (!response.ok) {
+                   reject('Enter a valid Bucket name');
+               }
+               resolve(response.json());
+           }).catch(error => {
+               return error;
+           });
+       });
+    }
+
+    static deleteItem(bucketId, itemId) {
+        return new Promise((resolve) => {
+           const request = new Request('https://bucketlist-application.herokuapp.com/api/v1/bucketlist/' + bucketId + '/bucketlistitem/' + itemId, {
+               method: 'DELETE',
+               headers: new Headers({
+                   'Content-Type': 'application/json',
+                   'Authorization': 'Token ' + localStorage.getItem('auth_token')
+               })
+           });
+           
+           return fetch(request).then(response => {
+               if (!response.ok) {
+                   reject('Delete failed');
+               }
+               resolve(response.json());
+           }).catch(error => {
+               return error;
+           });
+       });
+    }
+
     
 
 }

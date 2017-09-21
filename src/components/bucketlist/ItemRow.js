@@ -4,31 +4,25 @@ import PropTypes from 'prop-types';
 import Toggle from 'react-toggle';
 import  { MdEdit, MdDelete } from 'react-icons/lib/md';
 
-let checked;
+// let checked;
 
-const toggle = (value) => {
-    checked = !value
-};
-
-const ItemRow = ({itemId, itemName, done, openModal}) => {
-    checked = (done == 'true');
-
+const ItemRow = ({count, item, openModal, updateItemStatus}) => {
     return (
         <tr>
-            <td>{itemId}</td>
-            <td>{itemName}</td>
+            <td>{count}</td>
+            <td>{item.name}</td>
             <td>
                 <label>
                     <Toggle
-                        defaultChecked={checked}
-                        onChange={toggle(checked)} />
+                        defaultChecked={item.done}
+                        onChange={() => updateItemStatus(item.bucketlist_item_id)} />
                 </label>
             </td>
             <td>
-                <button type="button" className="action mx-2 icon-edit close" data-dismiss="modal" onClick={() => openModal('edit', itemId)}>
+                <button type="button" className="action mx-2 icon-edit close" data-dismiss="modal" onClick={() => openModal('edit', item.bucketlist_item_id)}>
                     <MdEdit size={20}/>
                 </button>
-                <button type="button" className="action mx-2 icon-delete close" data-dismiss="modal" onClick={() => openModal('delete',itemId)}>
+                <button type="button" className="action mx-2 icon-delete close" data-dismiss="modal" onClick={() => openModal('delete',item.bucketlist_item_id)}>
                     <MdDelete size={20}/>
                 </button>
             </td>

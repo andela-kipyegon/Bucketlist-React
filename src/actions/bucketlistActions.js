@@ -18,11 +18,11 @@ export const hideModal = () => {
 };
 
 export function createBucketlistSuccess(bucketlist) {
-    return { type: types.CREATE_BUCKETLIST_SUCCESS, bucketlist}
+    return { type: types.CREATE_BUCKETLIST_SUCCESS, bucketlist };
 }
 
 export function deleteBucketlistSuccess(bucketlistId) {
-    return { type: types.DELETE_BUCKETLIST_SUCCESS, bucketlistId}
+    return { type: types.DELETE_BUCKETLIST_SUCCESS, bucketlistId };
 }
 
 export function loadBucketlistSuccess(bucketlists) {
@@ -30,7 +30,15 @@ export function loadBucketlistSuccess(bucketlists) {
 }
 
 export function editBucketlistSuccess(bucketlist) {
-    return { type: types.EDIT_BUCKETLIST_SUCCESS, bucketlist};
+    return { type: types.EDIT_BUCKETLIST_SUCCESS, bucketlist };
+}
+
+export function editItemSuccess(savedItem, bucketId) {
+    return { type: types.EDIT_ITEM_SUCCESS, savedItem, bucketId };
+}
+
+export function deleteItemSuccess(bucketId, itemId) {
+    return { type: types.DELETE_ITEM_SUCCESS, bucketId, itemId };
 }
 
 export function loadBucketlists() {
@@ -71,6 +79,27 @@ export function editBucketlist(bucketlistId, name) {
         return bucketlistApi.editBucketlist(bucketlistId, name).then(response => {
             dispatch(editBucketlistSuccess(response));
             return response;
+        }).catch(error => {
+            throw(error);
+        })
+    }
+}
+
+export function editItem(bucketId, itemId, updatedItem) {
+    return function(dispatch) {
+        return bucketlistApi.editItem(bucketId, itemId, updatedItem).then(response => {
+            dispatch(editItemSuccess(response, bucketId));
+            return response;
+        }).catch(error => {
+            throw(error);
+        })
+    }
+}
+
+export function deleteItem(bucketId, itemId) {
+    return function(dispatch) {
+        return bucketlistApi.deleteItem(bucketId, itemId).then(() => {
+            return dispatch(deleteItemSuccess(bucketId, itemId));
         }).catch(error => {
             throw(error);
         })

@@ -13,7 +13,7 @@ export default function modalReducer(state = initialState.modal, action) {
             };
 
         case types.HIDE_MODAL:
-            return initialState;
+            return initialState.modal;
 
         default:
             return state;

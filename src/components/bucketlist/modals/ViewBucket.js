@@ -4,9 +4,10 @@ import { connect } from 'react-redux';
 import { Table } from 'react-bootstrap'; 
 import { MdEdit, MdDelete, MdVisibility } from 'react-icons/lib/md';
 import Modal from 'react-modal';
-import Toggle from 'react-toggle'
+import Toggle from 'react-toggle';
+import toastr from 'toastr';
 
-import { hideModal } from  '../../../actions/bucketlistActions';
+import { hideModal, editItem, deleteItem } from  '../../../actions/bucketlistActions';
 import ModalWrapper from '../ModalWrapper';
 import ItemRow from '../ItemRow';
 import DeleteItem from '../item-modals/DeleteItem';
@@ -26,10 +27,14 @@ class ViewBucket extends React.Component {
         }
 
         this.onClose = this.onClose.bind(this);
+        this.editItem = this.editItem.bind(this);
         this.updateItemName = this.updateItemName.bind(this);
         this.openModal = this.openModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
+        this.deleteItem = this.deleteItem.bind(this);
+        this.updateItemStatus =this.updateItemStatus.bind(this);
     }
+
 
     onClose() {
         this.props.hideModal();
@@ -38,20 +43,52 @@ class ViewBucket extends React.Component {
     updateItemName(event) {
         let item = this.state.params.item;
         item.name = event.target.value;
+
         return this.setState({
-            params : { item }
+            params: { 
+                item,
+                action: { 
+                        edit: this.editItem,
+                        onChange: this.updateItemName
+                }
+            }
         });  
     }
 
-    editItem() {
-        // let bucketName = { name: this.state.bucket.name };
-        // this.props.actions.editBucketlist(bucketId, bucketName)
-        //     .then((response) =>{
-        //         toastr.success('Bucket has been updated');
-        //         return this.props.actions.hideModal();
-        //     }).catch(error => {
-        //         toastr.error(error)
-        //     });
+    updateItemStatus(itemId) {
+        let item = { ...this.props.bucketlist.items.filter(item => item.bucketlist_item_id == itemId)[0] };
+        item.done = !item.done;
+        return this.editItem(item);
+    }
+
+    editItem(savedItem) {
+        let item = savedItem;
+        let bucketId = this.props.bucketId;
+        let updatedItem = {
+            item_name: item.name,
+            done: item.done
+        };
+
+        return this.props.editItem(bucketId, item.bucketlist_item_id, updatedItem)
+            .then(() => {
+                toastr.success('Item has been updated');
+                return this.closeModal();
+            }).catch(error => {
+                toastr.error(error)
+            });
+    }
+
+    deleteItem() {
+        let itemId = this.state.params.item.bucketlist_item_id;
+        let bucketId = this.props.bucketId;
+        
+        this.props.deleteItem(bucketId, itemId)
+            .then(() =>{
+                toastr.success('Item has been deleted');
+                return this.closeModal();
+            }).catch(error => {
+                toastr.error(error)
+            });
     }
 
     openModal(modalType, itemId) {
@@ -60,7 +97,11 @@ class ViewBucket extends React.Component {
                 modalContent: EditItem,
                 showModal: true,
                 params: {
-                    item: { ...this.props.content.filter(item => item.bucketlist_item_id == itemId)[0] }
+                    item: { ...this.props.bucketlist.items.filter(item => item.bucketlist_item_id == itemId)[0] },
+                    action: { 
+                        edit: this.editItem,
+                        onChange: this.updateItemName
+                    }
                 }
             });
         }
@@ -69,7 +110,11 @@ class ViewBucket extends React.Component {
             modalContent: DeleteItem,
             showModal: true,
             params: {
-                item: { ...this.props.content.filter(item => item.bucketlist_item_id == itemId)[0] }
+                item: { ...this.props.bucketlist.items.filter(item => item.bucketlist_item_id == itemId)[0] },
+                action: { 
+                    delete: this.deleteItem,
+                    closeModal: this.closeModal
+                }
             }
         }); 
     }
@@ -81,11 +126,19 @@ class ViewBucket extends React.Component {
     render() {
         const padding = 'p-0';
         const ModalContent = this.state.modalContent;
-        const params = { ...this.state.params, action: this.updateItemName }
+        const params = { ...this.state.params }
         let rows;
-
-        if (this.props.content.length > 1) {
-            rows = this.props.content.map(item => <ItemRow itemId={item.bucketlist_item_id} itemName={item.name} done={item.done} openModal={this.openModal} />);
+        
+        if (this.props.bucketlist.items.length > 0) {
+            rows = this.props.bucketlist.items.map((item, index) =>
+                <ItemRow 
+                    key={index}
+                    count={index+1}
+                    item={item}
+                    openModal={this.openModal}
+                    updateItemStatus={this.updateItemStatus}
+                />
+            );
         }
         else {
             rows = <tr><td colSpan="4">Nothing to display</td></tr>;
@@ -135,15 +188,21 @@ ViewBucket.propTypes = {
     hideModal: PropTypes.func
 };
 
-function mapDispatchToProps(dispatch) {
+function mapStateToProps(state, ownProps) {
     return {
-        hideModal: () => dispatch(hideModal()),
-        editItem: (itemId, itemName) => dispatch(editItem(itemId, itemName)),
-        deleteItem: (itemId) => dispatch(editItem(itemId))
+        bucketlist: state.bucketlists.bucketlist.filter(bucket => bucket.id == ownProps.bucketId )[0]
     };
 }
 
-export default connect(null, mapDispatchToProps)(ViewBucket);
+function mapDispatchToProps(dispatch) {
+    return {
+        hideModal: () => dispatch(hideModal()),
+        editItem: (bucketId,itemId, updatedItem) => dispatch(editItem(bucketId, itemId, updatedItem)),
+        deleteItem: (bucketId, itemId) => dispatch(deleteItem(bucketId, itemId))
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(ViewBucket);
 
 
 

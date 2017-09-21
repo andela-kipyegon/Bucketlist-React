@@ -3,9 +3,10 @@ import PropTypes from 'prop-types';
 
 import { Button } from 'react-bootstrap';
 
-const EditItem = ({ item, action }) => {
+const EditItem = ({ item, action}) => {
+    
+    const Item =  item;
 
-    debugger;
     return (
         <div className="row">
             <div className="col-sm-9">
@@ -13,13 +14,13 @@ const EditItem = ({ item, action }) => {
                     type="text"
                     name="item_name"
                     className="form-control"
-                    onChange={action}
+                    onChange={action.onChange}
                     placeholder="Item Name"
                     value={item.name}
                 />
             </div>
             <div className="col-sm-3">
-                <Button bsStyle="primary">
+                <Button bsStyle="primary" onClick={(item) => action.edit(Item)}>
                      Edit
                 </Button>
             </div>
